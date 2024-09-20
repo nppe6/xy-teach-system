@@ -4,18 +4,24 @@
       <div class="login-cover">
         <img src="@/assets/image/login/login.png" alt="" />
       </div>
-      <el-form ref="loginRef" :model="loginForm" :rules="rules" id="login-form">
+      <el-form ref="loginRef" :model="loginForm" :rules="loginRules" id="login-form">
         <h2>教务后台管理系统</h2>
 
         <el-form-item prop="username">
+          <el-icon :size="20" class="svg-container">
+            <i-ep-user />
+          </el-icon>
           <el-input v-model="loginForm.username" type="text" autocomplete="off" />
         </el-form-item>
         <el-form-item prop="password">
-          <el-input v-model="loginForm.password" type="password" autocomplete="off" />
+          <el-icon :size="20" class="svg-container">
+            <i-ep-lock />
+          </el-icon>
+          <el-input v-model="loginForm.password" type="password" autocomplete="off" show-password />
         </el-form-item>
 
         <el-form-item>
-          <el-button type="primary" @click="submitForm(ruleFormRef)"> 登录 </el-button>
+          <el-button type="primary" @click="submitForm()"> 登录 </el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -23,18 +29,53 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, reactive } from 'vue'
+import { ElMessage } from 'element-plus'
 
 defineOptions({
   name: 'LoginIndex'
 })
 
 const loginRef = ref()
-
 const loginForm = ref({
   username: '',
   password: ''
 })
+
+const validatorPassword = (rule, value, callBack) => {
+  if (value !== '') {
+    if (value.length >= 3 && value.length <= 16) {
+      callBack()
+    } else {
+      callBack(new Error('密码长度应大于3小于16'))
+    }
+  } else {
+    callBack(new Error('密码不能为空'))
+  }
+}
+// 定义 校验规则的 两种方式
+const loginRules = reactive({
+  username: [
+    { required: true, message: '用户名不能为空', trigger: 'blur' },
+    { min: 3, max: 16, message: '用户名应大于3并小于16个字符', trigger: 'blur' }
+  ],
+  password: [{ validator: validatorPassword, trigger: 'blur' }]
+})
+
+// 登录按钮
+const submitForm = () => {
+  loginRef.value.validate((valid) => {
+    if (valid) {
+      console.log('验证通过！')
+    } else {
+      ElMessage({
+        message: '用户名或密码输入格式错误',
+        type: 'error',
+        plain: true
+      })
+    }
+  })
+}
 </script>
 
 <style lang="scss" scoped>
@@ -77,6 +118,13 @@ $bg: #f0f0f1;
       h2 {
         text-align: center;
         margin-bottom: 48px;
+      }
+
+      .svg-container {
+        position: absolute;
+        top: 14px;
+        left: 14px;
+        z-index: 1;
       }
 
       :deep(.el-form-item) {
