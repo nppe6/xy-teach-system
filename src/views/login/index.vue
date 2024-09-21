@@ -31,13 +31,13 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
-
+import { useUserStore } from '@/store/user'
 defineOptions({
   name: 'LoginIndex'
 })
-
+const loginStore = useUserStore()
 const loginRef = ref()
-const loginForm = ref({
+const loginForm = reactive({
   username: '',
   password: ''
 })
@@ -67,6 +67,7 @@ const submitForm = () => {
   loginRef.value.validate((valid) => {
     if (valid) {
       console.log('验证通过！')
+      loginStore.axiosLogin(loginForm)
     } else {
       ElMessage({
         message: '用户名或密码输入格式错误',
